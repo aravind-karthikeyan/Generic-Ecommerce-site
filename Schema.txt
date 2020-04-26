@@ -24,3 +24,5 @@ Schema for Product :
 	Description		:
 	Rating			: {UserId: no. of stars}
 	Purchased by		: [UesrIds]
+	No. of items available	:
+	No. of items purchased	:
