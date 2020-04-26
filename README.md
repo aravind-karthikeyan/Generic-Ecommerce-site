@@ -14,7 +14,7 @@ Install Flask, bson & pymongo
 
 Before running the mongodb instance, we must create a data folder and run below command in command prompt.
 
-"C:\Program Files\MongoDB\Server\4.0\bin\mongod.exe" --dbpath="C:\mongo-data"
+"C:\Program Files\MongoDB\Server\4.2\bin\mongod.exe" --dbpath="C:\mongo-data"
 
 Here C:\mongo-data folder is used for saving mongodb files.
 
