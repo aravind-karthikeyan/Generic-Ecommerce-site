@@ -10,6 +10,7 @@ Schema for customer :
 	Mobile			:
 	Email			:
 	Password		:
+	Address			:
 	Products Purchased	:
 	Products wishlisted	:
 	Products on cart	:
