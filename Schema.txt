@@ -19,6 +19,8 @@ Schema for Product :
 	
 	ProductId		:
 	Name			:
+	Images			:
+	Tags			:
 	Description		:
 	Rating			: {UserId: no. of stars}
 	Purchased by		: [UesrIds]
