@@ -1,0 +1,24 @@
+Logins (2 types):
+
+1. Customer	-	can buy products
+2. Admin	-	can add/remove/update products
+
+Schema for customer :
+
+	UserId 			:
+	Name			:
+	Mobile			:
+	Email			:
+	Password		:
+	Products Purchased	:
+	Products wishlisted	:
+	Products on cart	:
+
+
+Schema for Product :
+	
+	ProductId		:
+	Name			:
+	Description		:
+	Rating			: {UserId: no. of stars}
+	Purchased by		: [UesrIds]
