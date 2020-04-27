@@ -106,6 +106,11 @@ def viewProducts ():
 	#Display the Products
 	return render_template('products.html', products = products.find())
 
+@app.route("/products/<int:productId>")
+def viewIndividualProduct (productId):
+	#Display the Products
+	return render_template('individual_product.html', product = products.find_one({"productId" : productId}))
+
 if __name__ == "__main__":
 
     app.run()

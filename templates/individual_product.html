@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <!--
 To change this license header, choose License Headers in Project Properties.
 To change this template file, choose Tools | Templates
@@ -56,40 +56,25 @@ and open the template in the editor.
                 </p>
             </div>
             <div class="padding-20"></div>
-            <div class="row text-center">
-              {% for i in products %}
-                <div class="col-md-3 col-sm-6">
-                    <div class="thumbnail">
-                        <a href="/products/{{ i['productId'] }}">
-                            {% if i['images']|length != 0 %}
-                            <img src="{{ i['images'][0] }}" alt="Nikon">
-                            {% endif %}
-                            {% if i['images']|length == 0 %}
-                            <img src="https://lh3.googleusercontent.com/proxy/XJWmpToBQY_XKVoiUolrNofS3saH9NSdUajlNesF34PU3pUodU7v6fLho2GIhEtUwbZbFaacxiR9tWPKvyzMZQQjhtAVhm2P2GWLT-eU88-bODOTQSoE-_cMVwmz9HXneBiJ" height="150%" width="1728">
-                            {% endif %}
-                        </a>
-                        <div class="caption">
-                            <a href="/products/{{ i['productId'] }}">
-                                <h3 class="text">{{ i['productName'] }}</h3>
-                            </a>
-                            <p> Rs. {{ i['price']|round(2) }} </p>
-                            <button class="add-to-cart">Add to Cart</button>
-                        </div>
+            <div class="col-md-8">
+                <div class="thumbnail">
+                    {% if product['images']|length != 0 %}
+                    <img src="{{ i['images'][0] }}" alt="Nikon">
+                    {% endif %}
+                    {% if product['images']|length == 0 %}
+                    <img src="https://lh3.googleusercontent.com/proxy/XJWmpToBQY_XKVoiUolrNofS3saH9NSdUajlNesF34PU3pUodU7v6fLho2GIhEtUwbZbFaacxiR9tWPKvyzMZQQjhtAVhm2P2GWLT-eU88-bODOTQSoE-_cMVwmz9HXneBiJ" height="150%" width="1728">
+                    {% endif %}
+                    <div class="caption">
+                        <h2 ><b>{{ product['productName'] }}</b></h2>
+                        <h2><b> Rs. {{ product['price']|round(2) }}</b> </h2>
+                        <h4> &nbsp;&nbsp;&nbsp;&nbsp;{{ product['description'] }} </h4>
+                        <br>
+                        <button class="buy-now">Buy Now</button>
+                        <button class="add-to-cart">Add to Cart</button>
                     </div>
                 </div>
-                {% endfor %}
             </div>
-            <div class="padding-20"></div>
         </div>
     </main>
-    <footer>
-        <div class="container">
-            <center>
-                Copyright © Lifestyle Store. All Rights Reserved and Contact Us: +91 90000 00000
-            </center>
-        </div>
-    </footer>
-
 </body>
-
 </html>
