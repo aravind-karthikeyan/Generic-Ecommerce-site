@@ -1,116 +1,72 @@
-from flask import Flask, render_template,request,redirect,url_for # For flask implementation
+from flask import Flask, render_template,request,redirect,url_for,session # For flask implementation
 from bson import ObjectId # For ObjectId to work
 from pymongo import MongoClient
 import os
+import bcrypt
+from flask_login import logout_user
 
 app = Flask(__name__)
 title = "TODO sample application with Flask and MongoDB"
 heading = "TODO Reminder with Flask and MongoDB"
 
 client = MongoClient("mongodb://127.0.0.1:27017") #host uri
-db = client.mymongodb    #Select the database
-todos = db.todo #Select the collection name
-db2 = client.generic_ecommerce_website
-products = db2.products
-users = db2.users
+db = client.generic_ecommerce_website
+products = db.products
+users = db.users
+
+@app.route('/')
+def index():
+    if 'username' in session:
+        return render_template("products.html",products = products.find())
+
+    return render_template('index.html')
+
+@app.route('/login', methods=['POST'])
+def login():
+	login_user = users.find_one({'username' : request.form['username']})
+	if login_user:
+		if bcrypt.hashpw(request.form['password'].encode('utf-8'), login_user['password']) == login_user['password']:
+			session['username'] = request.form['username']
+			return redirect(url_for('index'))
+	return 'Invalid username/password combination'
+
+@app.route('/register', methods=['POST', 'GET'])
+def register():
+	if request.method == 'POST':
+		users = db.users
+		existing_user = users.find_one({'username' : request.form['username']})
+		if existing_user is None:
+			hashpass = bcrypt.hashpw(request.form['password'].encode('utf-8'), bcrypt.gensalt())
+			users.insert({'username' : request.form['username'], 'password' : hashpass})
+			session['username'] = request.form['username']
+			return redirect(url_for('index'))
+		return 'That username already exists!'
+	return render_template('register.html')
+
+@app.route('/logout')
+def logout():
+	if 'username' in session:
+		session.pop('username')
+	return render_template('index.html')
 
 def redirect_url():
     return request.args.get('next') or \
            request.referrer or \
            url_for('index')
 
-@app.route("/list")
-def lists ():
-	#Display the all Tasks
-	todos_l = todos.find()
-	a1="active"
-	return render_template('index.html',a1=a1,todos=todos_l,t=title,h=heading)
-
-@app.route("/")
-@app.route("/uncompleted")
-def tasks ():
-	#Display the Uncompleted Tasks
-	todos_l = todos.find({"done":"no"})
-	a2="active"
-	return render_template('index.html',a2=a2,todos=todos_l,t=title,h=heading)
-
-
-@app.route("/completed")
-def completed ():
-	#Display the Completed Tasks
-	todos_l = todos.find({"done":"yes"})
-	a3="active"
-	return render_template('index.html',a3=a3,todos=todos_l,t=title,h=heading)
-
-@app.route("/done")
-def done ():
-	#Done-or-not ICON
-	id=request.values.get("_id")
-	task=todos.find({"_id":ObjectId(id)})
-	if(task[0]["done"]=="yes"):
-		todos.update({"_id":ObjectId(id)}, {"$set": {"done":"no"}})
-	else:
-		todos.update({"_id":ObjectId(id)}, {"$set": {"done":"yes"}})
-	redir=redirect_url()	
-
-	return redirect(redir)
-
-@app.route("/action", methods=['POST'])
-def action ():
-	#Adding a Task
-	name=request.values.get("name")
-	desc=request.values.get("desc")
-	date=request.values.get("date")
-	pr=request.values.get("pr")
-	todos.insert({ "name":name, "desc":desc, "date":date, "pr":pr, "done":"no"})
-	return redirect("/list")
-
-@app.route("/remove")
-def remove ():
-	#Deleting a Task with various references
-	key=request.values.get("_id")
-	todos.remove({"_id":ObjectId(key)})
-	return redirect("/")
-
-@app.route("/update")
-def update ():
-	id=request.values.get("_id")
-	task=todos.find({"_id":ObjectId(id)})
-	return render_template('update.html',tasks=task,h=heading,t=title)
-
-@app.route("/action3", methods=['POST'])
-def action3 ():
-	#Updating a Task with various references
-	name=request.values.get("name")
-	desc=request.values.get("desc")
-	date=request.values.get("date")
-	pr=request.values.get("pr")
-	id=request.values.get("_id")
-	todos.update({"_id":ObjectId(id)}, {'$set':{ "name":name, "desc":desc, "date":date, "pr":pr }})
-	return redirect("/")
-
-@app.route("/search", methods=['GET'])
-def search():
-	#Searching a Task with various references
-
-	key=request.values.get("key")
-	refer=request.values.get("refer")
-	if(key=="_id"):
-		todos_l = todos.find({refer:ObjectId(key)})
-	else:
-		todos_l = todos.find({refer:key})
-	return render_template('searchlist.html',todos=todos_l,t=title,h=heading)
-
 @app.route("/products")
 def viewProducts ():
 	#Display the Products
-	return render_template('products.html', products = products.find())
+	if 'username' in session:
+		return render_template("products.html",products = products.find())
+	return render_template('index.html')
 
 @app.route("/products/<int:productId>")
 def viewIndividualProduct (productId):
 	#Display the Products
-	return render_template('individual_product.html', product = products.find_one({"productId" : productId}))
-
+	if 'username' in session:
+		return render_template('individual_product.html', product = products.find_one({"productId" : productId}))
+	return render_template('index.html')
 if __name__ == "__main__":
-
-    app.run()
+	app.secret_key = 'mysecret'
+	app.run()
