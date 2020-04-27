@@ -10,6 +10,9 @@ heading = "TODO Reminder with Flask and MongoDB"
 client = MongoClient("mongodb://127.0.0.1:27017") #host uri
 db = client.mymongodb    #Select the database
 todos = db.todo #Select the collection name
+db2 = client.generic_ecommerce_website
+products = db2.products
+users = db2.users
 
 def redirect_url():
     return request.args.get('next') or \
@@ -97,6 +100,11 @@ def search():
 	else:
 		todos_l = todos.find({refer:key})
 	return render_template('searchlist.html',todos=todos_l,t=title,h=heading)
+
+@app.route("/products")
+def viewProducts ():
+	#Display the Products
+	return render_template('products.html', products = products.find())
 
 if __name__ == "__main__":
 

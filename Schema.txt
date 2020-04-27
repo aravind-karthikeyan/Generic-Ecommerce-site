@@ -21,9 +21,9 @@ Schema for Product :
 	ProductId		:
 	Name			:
 	Images			:
+	Price			:
 	Tags			:
 	Description		:
 	Rating			: {UserId: no. of stars}
-	Purchased by		: [UesrIds]
+	Purchased by		: [UserIds]
 	No. of items available	:
-	No. of items purchased	:
