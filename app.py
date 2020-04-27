@@ -3,7 +3,6 @@ from bson import ObjectId # For ObjectId to work
 from pymongo import MongoClient
 import os
 import bcrypt
-from flask_login import logout_user
 
 app = Flask(__name__)
 title = "TODO sample application with Flask and MongoDB"
