@@ -5,12 +5,7 @@ Download python from https://www.python.org/downloads/
 
 Download MongoDB from https://www.mongodb.com/download-center#community
 
-Install Flask, bson & pymongo
->pip install Flask
-
->pip install bson
-
->pip install pymongo
+Install necessary packages from requirements.txt
 
 Before running the mongodb instance, we must create a data folder and run below command in command prompt.
 
@@ -27,5 +22,3 @@ Run app.py in Command prompt.
 python app.py
 
 Our local web server is running in the port 5000 by default.
-
-##### Happy coding with Flask and MongoDB!!!
