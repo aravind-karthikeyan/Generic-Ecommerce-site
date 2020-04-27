@@ -1,5 +1,4 @@
 flask
 bson
 pymongo
-flask-login
 bcrypt
