@@ -69,12 +69,14 @@ and open the template in the editor.
                         <h2><b> Rs. {{ product['price']|round(2) }}</b> </h2>
                         <h4> &nbsp;&nbsp;&nbsp;&nbsp;{{ product['description'] }} </h4>
                         <br>
-                        <form action="http://localhost:5000/buy/{{ i['productId'] }}">
-                            <input type="submit" value="Buy Now" style="width: 100px;">
-                        </form>
-                        <form action="http://localhost:5000/cart/{{ i['productId'] }}">
-                            <input type="submit" value="Add to Cart" style="width: 100px;">
-                        </form>
+                        <div class="row" style="margin-left: 40%;">
+                            <form action="http://localhost:5000/buy/{{ product['productId'] }}">
+                                <input type="submit" value="Buy Now" style="width: 100px;">
+                            </form>
+                            <form action="http://localhost:5000/cart/{{ product['productId'] }}">
+                                <input type="submit" value="Add to Cart" style="width: 100px;">
+                            </form>
+                        </row>
                     </div>
                 </div>
             </div>
