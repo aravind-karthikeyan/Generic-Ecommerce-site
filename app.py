@@ -77,13 +77,35 @@ def addToCart (productId):
 		user = db.users.find_one({"username": username})
 		return redirect(url_for('index'))
 	return redirect(url_for('index'))
-@app.route("/remove/<int:productId>")
-def removeFromCart (productId):
+@app.route("/add_one/<int:productId>")
+def addOneToCart (productId):
 	#add item to cart
 	if 'username' in session:
 		username = session["username"]
 		user = db.users.find_one({"username": username})
+		user['cart'].append(productId)
+		db.users.update_one({"username": username}, {"$set": {"cart": user['cart']}})
+		user = db.users.find_one({"username": username})
+		return redirect(url_for('viewCart'))
+	return redirect(url_for('index'))
+@app.route("/remove/<int:productId>")
+def removeFromCart (productId):
+	#remove item from cart
+	if 'username' in session:
+		username = session["username"]
+		user = db.users.find_one({"username": username})
 		user['cart'] = list(filter(lambda a: a != productId, user['cart']))
+		db.users.update_one({"username": username}, {"$set": {"cart": user['cart']}})
+		return redirect(url_for('viewCart'))
+	return redirect(url_for('index'))
+@app.route("/remove_one/<int:productId>")
+def removeOneFromCart (productId):
+	#remove an item from cart
+	if 'username' in session:
+		username = session["username"]
+		user = db.users.find_one({"username": username})
+		print(user)
+		user['cart'].remove(productId)
 		db.users.update_one({"username": username}, {"$set": {"cart": user['cart']}})
 		return redirect(url_for('viewCart'))
 	return redirect(url_for('index'))
@@ -102,6 +124,38 @@ def viewCart ():
 			total+=productsMap[i["productId"]][1]*cart[i["productId"]]
 		return render_template("cart.html",user = user, cart = cart, products = productsMap, total = total)
 	return redirect(url_for('index'))
+@app.route("/place_order")
+def placeOrder ():
+	#place order
+	if 'username' in session:
+		username = session["username"]
+		user = db.users.find_one({"username": username})
+		cart = dict(Counter(user["cart"]))
+		product = products.find({"productId" : { "$in" : list(cart.keys())} })
+		flag = 1
+		for i in product:
+			if(i['numOfItemsAvailable']-cart[i['productId']]<0):
+				flag = 0
+				break
+		if(flag==0):
+			return "Order can't be placed"
+		else:
+			product = products.find({"productId" : { "$in" : list(cart.keys())} })
+			for i in product:
+				purchased = db.users.find_one({"username": username})["purchased"]
+				db.users.update_one({"username": username}, {"$set": {"purchased": purchased+[i['productId']]*cart[i['productId']]}})
+				db.products.update_one({"productId": i['productId']}, {"$set": {"numOfItemsAvailable": i['numOfItemsAvailable']-cart[i['productId']]}})
+			return redirect(url_for('clearCart'))	
+	return redirect(url_for('index'))
+@app.route("/clear_cart")
+def clearCart ():
+	#clear cart
+	if 'username' in session:
+		username = session["username"]
+		db.users.update_one({"username": username}, {"$set": {"cart": []}})
+		return render_template("success.html")
+	return redirect(url_for('index'))
 if __name__ == "__main__":
 	app.secret_key = 'mysecret'
+	app.debug = True
 	app.run()

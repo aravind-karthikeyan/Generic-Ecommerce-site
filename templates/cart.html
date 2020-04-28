@@ -59,7 +59,15 @@ and open the template in the editor.
                                 <tr>
                                     <th style = "text-align : center">{{ i }}</th>
                                     <th style = "text-align : center">{{ products[i][0] }}</th>
-                                    <th style = "text-align : center">{{ cart[i] }}</th>
+                                    <th style = "text-align : center; vertical-align: middle;">
+                                        <form action="http://localhost:5000/remove_one/{{ i }}" style="float: left;">
+                                            <input type="submit" value="-">
+                                        </form>
+                                        {{ cart[i] }}
+                                        <form action="http://localhost:5000/add_one/{{ i }}" style="float: right;">
+                                            <input type="submit" value="+">
+                                        </form>
+                                    </th>
                                     <th style = "text-align : right">Rs.{{ (products[i][1]*cart[i])|round(2,'ceil') }}</th>
                                     <th>
                                         <form action="http://localhost:5000/remove/{{ i }}">
@@ -73,8 +81,10 @@ and open the template in the editor.
                                     <td></td>
                                     <td style = "text-align : right">Total :</td>
                                     <td style = "text-align : right">Rs.{{ total|round(2,'ceil') }}</td>
-                                    <td><a href="/success"><button class="btn btn-primary">Confirm
-                                                Order</button></a>
+                                    <td>
+                                        <form action="http://localhost:5000/place_order">
+                                            <input type="submit" value="Confirm Order" style="width: 100px;">
+                                        </form>
                                     </td>
                                 </tr>
                             </tbody>
