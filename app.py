@@ -155,6 +155,19 @@ def clearCart ():
 		db.users.update_one({"username": username}, {"$set": {"cart": []}})
 		return render_template("success.html")
 	return redirect(url_for('index'))
+@app.route("/my_orders")
+def viewOrders ():
+	#view orders by a user
+	if 'username' in session:
+		username = session["username"]
+		user = db.users.find_one({"username": username})
+		orders = dict(Counter(user["purchased"]))
+		product = products.find({"productId" : { "$in" : list(orders.keys())} })
+		productsMap = dict()
+		for i in product:
+			productsMap[i["productId"]] = [i["productName"] ,i["price"]]
+		return render_template("orders.html",user = user, orders = orders, products = productsMap)
+	return redirect(url_for('index'))
 if __name__ == "__main__":
 	app.secret_key = 'mysecret'
 	app.debug = True
