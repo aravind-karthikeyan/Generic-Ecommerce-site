@@ -34,14 +34,14 @@ and open the template in the editor.
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a href="index.html" class="navbar-brand">Lifestyle store</a>
+                    <a href="/" class="navbar-brand">Generic Ecommerce Website</a>
                 </div>
                 <div class="collapse navbar-collapse" id="mynavbar">
                     <ul class="nav navbar-nav navbar-right">
 
-                        <li><a href="cart.html"><span class="glyphicon glyphicon-shopping-cart">Cart</span></a></li>
-                        <li><a href="settings.html"><span class="glyphicon glyphicon-user">Settings</span></a></li>
-                        <li><a href="logout.html"><span class="glyphicon glyphicon-log-out">Logout</span></a></li>
+                        <li><a href="/view_cart"><span class="glyphicon glyphicon-shopping-cart">Cart({{ user["cart"]|length }})</span></a></li>
+                        <li><a href="/my_orders"><span class="glyphicon glyphicon-tasks">MyOrders</span></a></li>
+                        <li><a href="/logout"><span class="glyphicon glyphicon-log-out">Logout</span></a></li>
                     </ul>
                 </div>
             </div>
@@ -62,15 +62,19 @@ and open the template in the editor.
                     <img src="{{ i['images'][0] }}" alt="Nikon">
                     {% endif %}
                     {% if product['images']|length == 0 %}
-                    <img src="https://lh3.googleusercontent.com/proxy/XJWmpToBQY_XKVoiUolrNofS3saH9NSdUajlNesF34PU3pUodU7v6fLho2GIhEtUwbZbFaacxiR9tWPKvyzMZQQjhtAVhm2P2GWLT-eU88-bODOTQSoE-_cMVwmz9HXneBiJ" height="150%" width="1728">
+                    <img src="{{ url_for('static',filename='images/default.png')}}">
                     {% endif %}
                     <div class="caption">
                         <h2 ><b>{{ product['productName'] }}</b></h2>
                         <h2><b> Rs. {{ product['price']|round(2) }}</b> </h2>
                         <h4> &nbsp;&nbsp;&nbsp;&nbsp;{{ product['description'] }} </h4>
                         <br>
-                        <button class="buy-now">Buy Now</button>
-                        <button class="add-to-cart">Add to Cart</button>
+                        <form action="http://localhost:5000/buy/{{ i['productId'] }}">
+                            <input type="submit" value="Buy Now" style="width: 100px;">
+                        </form>
+                        <form action="http://localhost:5000/cart/{{ i['productId'] }}">
+                            <input type="submit" value="Add to Cart" style="width: 100px;">
+                        </form>
                     </div>
                 </div>
             </div>
