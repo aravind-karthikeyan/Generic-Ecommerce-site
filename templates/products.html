@@ -34,13 +34,13 @@ and open the template in the editor.
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a href="index.html" class="navbar-brand">Lifestyle store</a>
+                    <a href="/" class="navbar-brand">Generic Ecommerce Website</a>
                 </div>
                 <div class="collapse navbar-collapse" id="mynavbar">
                     <ul class="nav navbar-nav navbar-right">
 
-                        <li><a href="cart.html"><span class="glyphicon glyphicon-shopping-cart">Cart</span></a></li>
-                        <li><a href="settings.html"><span class="glyphicon glyphicon-user">Settings</span></a></li>
+                        <li><a href="/view_cart"><span class="glyphicon glyphicon-shopping-cart">Cart({{ user["cart"]|length }})</span></a></li>
+                        <li><a href="/my_orders"><span class="glyphicon glyphicon-tasks">MyOrders</span></a></li>
                         <li><a href="/logout"><span class="glyphicon glyphicon-log-out">Logout</span></a></li>
                     </ul>
                 </div>
@@ -65,7 +65,7 @@ and open the template in the editor.
                             <img src="{{ i['images'][0] }}" alt="Nikon">
                             {% endif %}
                             {% if i['images']|length == 0 %}
-                            <img src="https://lh3.googleusercontent.com/proxy/XJWmpToBQY_XKVoiUolrNofS3saH9NSdUajlNesF34PU3pUodU7v6fLho2GIhEtUwbZbFaacxiR9tWPKvyzMZQQjhtAVhm2P2GWLT-eU88-bODOTQSoE-_cMVwmz9HXneBiJ" height="150%" width="1728">
+                            <img src="{{ url_for('static',filename='images/default.png')}}">
                             {% endif %}
                         </a>
                         <div class="caption">
@@ -73,7 +73,12 @@ and open the template in the editor.
                                 <h3 class="text">{{ i['productName'] }}</h3>
                             </a>
                             <p> Rs. {{ i['price']|round(2) }} </p>
-                            <button class="add-to-cart">Add to Cart</button>
+                            <form action="http://localhost:5000/buy/{{ i['productId'] }}">
+                                <input type="submit" value="Buy Now" style="width: 100px; margin-top: 10px;">
+                            </form>
+                            <form action="http://localhost:5000/cart/{{ i['productId'] }}">
+                                <input type="submit" value="Add to Cart" style="width: 100px; margin-top: 10px;">
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -85,7 +90,7 @@ and open the template in the editor.
     <footer>
         <div class="container">
             <center>
-                Copyright © Lifestyle Store. All Rights Reserved and Contact Us: +91 90000 00000
+                Copyright © Generic Ecommerce Store. All Rights Reserved and Contact Us: +91 81229 14757
             </center>
         </div>
     </footer>
