@@ -4,6 +4,7 @@ from pymongo import MongoClient
 import os
 import bcrypt
 from collections import Counter
+from neo4j import GraphDatabase
 
 app = Flask(__name__)
 title = "TODO sample application with Flask and MongoDB"
@@ -14,9 +15,18 @@ db = client.generic_ecommerce_website
 products = db.products
 users = db.users
 
+uri = "bolt://localhost:7687"
+graphDB_Driver = GraphDatabase.driver(uri, auth=("neo4j", "password"),encrypted=False) # "password" is basically ur neo4j password
+
 @app.route('/')
 def index():
     if 'username' in session:
+        cql="match (u:User)-[:brought]->(p:Product)<-[:brought]-(q:User)-[:brought]->(r:Product) \
+			where u.name=$name AND r.rating>4.5 AND r.stocksAvailable>0 AND p.id<>r.id return r.id,r.name"
+        with graphDB_Driver.session() as graphDB_Session:
+            nodes = graphDB_Session.run(cql,name=session['username'])
+            for node in nodes:
+                print("Id:",node["r.id"],"Name:",node["r.name"])
         return render_template("products.html",products = products.find(), user = users.find_one({"username" : session["username"]}))
     return render_template('index.html')
 
