@@ -96,9 +96,11 @@ def viewCart ():
 		cart = dict(Counter(user["cart"]))
 		product = products.find({"productId" : { "$in" : list(cart.keys())} })
 		productsMap = dict()
+		total = 0
 		for i in product:
 			productsMap[i["productId"]] = [i["productName"] ,i["price"]]
-		return render_template("cart.html",user = user, cart = cart, products = productsMap)
+			total+=productsMap[i["productId"]][1]*cart[i["productId"]]
+		return render_template("cart.html",user = user, cart = cart, products = productsMap, total = total)
 	return redirect(url_for('index'))
 if __name__ == "__main__":
 	app.secret_key = 'mysecret'
