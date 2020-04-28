@@ -48,19 +48,19 @@ and open the template in the editor.
                         <table class="table table-bordered table-striped table-hover">
                             <tbody>
                                 <tr>
-                                    <th>Item Number</th>
-                                    <th>Item Name</th>
-                                    <th>Item Quantity</th>
-                                    <th>Price</th>
+                                    <th style = "text-align : center">Item Number</th>
+                                    <th style = "text-align : center">Item Name</th>
+                                    <th style = "text-align : center">Item Quantity</th>
+                                    <th style = "text-align : center">Price</th>
                                     <th></th>
                                 </tr>
                                 <tr></tr>
                                 {% for i in cart %}
                                 <tr>
-                                    <th>{{ i }}</th>
-                                    <th>{{ products[i][0] }}</th>
-                                    <th>{{ cart[i] }}</th>
-                                    <th>{{ (products[i][1]*cart[i])|round(2,'ceil') }}</th>
+                                    <th style = "text-align : center">{{ i }}</th>
+                                    <th style = "text-align : center">{{ products[i][0] }}</th>
+                                    <th style = "text-align : center">{{ cart[i] }}</th>
+                                    <th style = "text-align : right">Rs.{{ (products[i][1]*cart[i])|round(2,'ceil') }}</th>
                                     <th>
                                         <form action="http://localhost:5000/remove/{{ i }}">
                                             <input type="submit" value="Remove" style="width: 100px;">
@@ -71,8 +71,8 @@ and open the template in the editor.
                                 <tr>
                                     <td></td>
                                     <td></td>
-                                    <td>Total</td>
-                                    <td>Rs.{{ total|round(2,'ceil') }}</td>
+                                    <td style = "text-align : right">Total :</td>
+                                    <td style = "text-align : right">Rs.{{ total|round(2,'ceil') }}</td>
                                     <td><a href="/success"><button class="btn btn-primary">Confirm
                                                 Order</button></a>
                                     </td>
