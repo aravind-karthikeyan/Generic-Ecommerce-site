@@ -60,7 +60,7 @@ and open the template in the editor.
                                     <th style = "text-align : center">{{ i["productId"] }}</th>
                                     <th style = "text-align : center">{{ i["productName"] }}</th>
                                     <th style = "text-align : center; vertical-align: middle;">{{ i["numOfItemsAvailable"] }}</th>
-                                    <th style = "text-align : right">Rs.{{ i["numOfItemsAvailable"]|round(2,"ceil") }}</th>
+                                    <th style = "text-align : right">Rs.{{ i["price"]|round(2,"ceil") }}</th>
                                     <th>
                                         <form action="http://localhost:5000/edit_product/{{ i['productId'] }}" method="GET">
                                             <input type="submit" value="Edit" style="width: 100px;">
