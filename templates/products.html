@@ -62,10 +62,10 @@ and open the template in the editor.
                     <div class="thumbnail">
                         <a href="/products/{{ i['productId'] }}">
                             {% if i['images']|length != 0 %}
-                            <img src="{{ i['images'][0] }}" alt="Nikon">
+                            <img src="{{ i['images'][0] }}" alt="Nikon" style="height: 250px !important;">
                             {% endif %}
                             {% if i['images']|length == 0 %}
-                            <img src="{{ url_for('static',filename='images/default.png')}}">
+                            <img src="{{ url_for('static',filename='images/default.png')}}" style="height: 250px !important;">
                             {% endif %}
                         </a>
                         <div class="caption">
