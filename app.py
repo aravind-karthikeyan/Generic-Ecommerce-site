@@ -6,8 +6,6 @@ import bcrypt
 from collections import Counter
 
 app = Flask(__name__)
-title = "TODO sample application with Flask and MongoDB"
-heading = "TODO Reminder with Flask and MongoDB"
 
 client = MongoClient("mongodb://127.0.0.1:27017") #host uri
 db = client.generic_ecommerce_website
@@ -17,9 +15,11 @@ admins = db.admins
 
 @app.route('/')
 def index():
-    if 'username' in session:
-        return redirect(url_for('viewProducts'))
-    return render_template('index.html')
+	if 'username' in session:
+		return redirect(url_for('viewProducts'))
+	if 'manufacturerName' in session:
+		return redirect(url_for('adminIndex'))
+	return render_template('index.html')
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -222,9 +222,63 @@ def editProduct(productId):
 			return render_template("edit_product.html",product = product)
 		return "You have no permission to edit that product!"
 	if 'username' in session:
-		return "You have no rights to access that page!"
+		return "You are not permitted to access that page"
 	return redirect(url_for('adminIndex')) 
+@app.route('/submit_edit/<int:productId>', methods=['GET','POST'])
+def submitEdit(productId):
+	if 'manufacturerName' in session:
+		username = session["manufacturerName"]
+		product = products.find_one({"productId" : productId},{"_id":0,"ratings":0})
+		if(product["manufacturer"] == username):
+			db.products.update_one({"productId": productId}, {"$set": { \
+				"productName" : request.form['productName'], \
+				"price" : float(request.form['price']), \
+				"description" : request.form['description'], \
+				"images" : list(request.form['images']),\
+				"tags" : request.form['tags'],\
+				"numOfItemsAvailable" : int(request.form['numOfItemsAvailable'])
+				}})
+			return redirect(url_for('editSuccess'))
+		else:
+			return "You have no permission to edit that product!"
+	if 'username' in session:
+		return "You are not permitted to access that page"
+	return redirect(url_for('adminIndex'))
 
+@app.route('/add_product_success', methods=['GET','POST'])
+def addProductSuccess():
+	if 'manufacturerName' in session:
+		username = session["manufacturerName"]
+		productId = products.find({}, {"productId": 1, "_id":0}).sort([("productId",-1)]).limit(1)
+		pid = 0
+		for i in productId:
+			pid = i["productId"]
+		productId = pid+1
+		db.products.insert_one( { \
+		"productId" : productId, \
+		"manufacturer" : username, \
+		"productName" : request.form['productName'], \
+		"price" : float(request.form['price']), \
+		"description" : request.form['description'], \
+		"images" : list(request.form['images']),\
+		"tags" : request.form['tags'],\
+		"numOfItemsAvailable" : int(request.form['numOfItemsAvailable'])
+		})
+		return redirect(url_for('editSuccess'))
+	else:
+		return redirect(url_for('adminIndex'))
+
+@app.route('/add_product', methods=['GET','POST'])
+def addProduct():
+	if 'manufacturerName' in session:
+		return render_template("add_product.html")
+	if 'username' in session:
+		return "You are not permitted to access that page"
+	return redirect(url_for('adminIndex'))
+
+@app.route('/product_edit_success')
+def editSuccess():
+	return render_template('product_edit_success.html')
 if __name__ == "__main__":
 	app.secret_key = 'mysecret'
 	app.debug = True
