@@ -59,7 +59,7 @@ and open the template in the editor.
             <div class="col-md-8">
                 <div class="thumbnail">
                     {% if product['images']|length != 0 %}
-                    <img src="{{ i['images'][0] }}" alt="Nikon">
+                    <img src="{{ product['images'][0] }}" alt="Nikon" style="height: 500px !important;">
                     {% endif %}
                     {% if product['images']|length == 0 %}
                     <img src="{{ url_for('static',filename='images/default.png')}}">

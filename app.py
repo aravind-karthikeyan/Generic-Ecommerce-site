@@ -124,6 +124,10 @@ def viewCart ():
 			total+=productsMap[i["productId"]][1]*cart[i["productId"]]
 		return render_template("cart.html",user = user, cart = cart, products = productsMap, total = total)
 	return redirect(url_for('index'))
+@app.route("/buy/<int:productId>")
+def buyNow (productId):
+	#buy a product
+	return addOneToCart(productId)
 @app.route("/place_order")
 def placeOrder ():
 	#place order

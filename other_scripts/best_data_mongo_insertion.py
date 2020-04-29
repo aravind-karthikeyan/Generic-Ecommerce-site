@@ -1,7 +1,6 @@
 import pandas as pd
 from pymongo import MongoClient
 from random import randint   
-from collections import *
 import time
 
 client = MongoClient('localhost', 27017)
@@ -29,4 +28,4 @@ for i in range(len(df)):
         d['numOfItemsAvailable'] = int(df.iloc[i][12])+100
     except:
         d['numOfItemsAvailable'] = 100
-    mycollection.insert_one(d)
+    #mycollection.insert_one(d)
