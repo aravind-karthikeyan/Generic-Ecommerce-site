@@ -254,13 +254,16 @@ def addProductSuccess():
 		for i in productId:
 			pid = i["productId"]
 		productId = pid+1
+		link = str(request.form['images'])
+		links = []
+		links.append(link)
 		db.products.insert_one( { \
 		"productId" : productId, \
 		"manufacturer" : username, \
 		"productName" : request.form['productName'], \
 		"price" : float(request.form['price']), \
 		"description" : request.form['description'], \
-		"images" : list(request.form['images']),\
+		"images" : links,\
 		"tags" : request.form['tags'],\
 		"numOfItemsAvailable" : int(request.form['numOfItemsAvailable'])
 		})
