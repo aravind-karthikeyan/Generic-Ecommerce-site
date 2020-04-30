@@ -70,10 +70,10 @@ and open the template in the editor.
                         <h4> &nbsp;&nbsp;&nbsp;&nbsp;{{ product['description'] }} </h4>
                         <br>
                         <div class="row" style="margin-left: 40%;">
-                            <form action="http://localhost:5000/buy/{{ product['productId'] }}">
+                            <form action="{{url_for('buyNow'), productId = product['productId'] }}">
                                 <input type="submit" value="Buy Now" style="width: 100px;">
                             </form>
-                            <form action="http://localhost:5000/cart/{{ product['productId'] }}">
+                            <form action="{{url_for('addToCart'), productId = product['productId'] }}">
                                 <input type="submit" value="Add to Cart" style="width: 100px;">
                             </form>
                         </row>

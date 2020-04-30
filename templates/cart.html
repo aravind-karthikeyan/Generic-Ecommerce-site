@@ -60,17 +60,17 @@ and open the template in the editor.
                                     <th style = "text-align : center">{{ i }}</th>
                                     <th style = "text-align : center">{{ products[i][0] }}</th>
                                     <th style = "text-align : center; vertical-align: middle;">
-                                        <form action="http://localhost:5000/remove_one/{{ i }}" style="float: left;">
+                                        <form action="{{url_for('removeOneFromCart'),productId=i }}" style="float: left;">
                                             <input type="submit" value="-">
                                         </form>
                                         {{ cart[i] }}
-                                        <form action="http://localhost:5000/add_one/{{ i }}" style="float: right;">
+                                        <form action="{{url_for('addOneToCart'),productId=i }}" style="float: right;">
                                             <input type="submit" value="+">
                                         </form>
                                     </th>
                                     <th style = "text-align : right">Rs.{{ (products[i][1]*cart[i])|round(2,'ceil') }}</th>
                                     <th>
-                                        <form action="http://localhost:5000/remove/{{ i }}">
+                                        <form action="{{url_for('removeFromCart'),productId=i }}">
                                             <input type="submit" value="Remove" style="width: 100px;">
                                         </form>
                                     </th>
@@ -82,7 +82,7 @@ and open the template in the editor.
                                     <td style = "text-align : right">Total :</td>
                                     <td style = "text-align : right">Rs.{{ total|round(2,'ceil') }}</td>
                                     <td>
-                                        <form action="http://localhost:5000/place_order">
+                                        <form action="{{url_for('placeOrder')}}">
                                             <input type="submit" value="Confirm Order" style="width: 100px;">
                                         </form>
                                     </td>
