@@ -3,3 +3,4 @@ bson
 pymongo
 bcrypt
 gunicorn
+dnspython

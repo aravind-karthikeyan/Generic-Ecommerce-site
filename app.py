@@ -7,7 +7,7 @@ from collections import Counter
 
 app = Flask(__name__)
 
-client = MongoClient("mongodb://127.0.0.1:27017") #host uri
+client = MongoClient('mongodb+srv://cluster0-8cf7c.gcp.mongodb.net/test',username='aravindk',password='aravindk')
 db = client.generic_ecommerce_website
 products = db.products
 users = db.users
