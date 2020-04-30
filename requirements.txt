@@ -2,3 +2,4 @@ flask
 bson
 pymongo
 bcrypt
+gunicorn
