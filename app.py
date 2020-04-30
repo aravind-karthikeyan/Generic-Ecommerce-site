@@ -6,6 +6,7 @@ import bcrypt
 from collections import Counter
 
 app = Flask(__name__)
+app.secret_key = 'mysecret'
 
 client = MongoClient('mongodb+srv://cluster0-8cf7c.gcp.mongodb.net/test',username='aravindk',password='aravindk')
 db = client.generic_ecommerce_website
@@ -283,6 +284,5 @@ def addProduct():
 def editSuccess():
 	return render_template('product_edit_success.html')
 if __name__ == "__main__":
-	app.secret_key = 'mysecret'
 	app.debug = True
 	app.run()
