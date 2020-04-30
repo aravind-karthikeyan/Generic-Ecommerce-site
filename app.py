@@ -230,12 +230,15 @@ def submitEdit(productId):
 	if 'manufacturerName' in session:
 		username = session["manufacturerName"]
 		product = products.find_one({"productId" : productId},{"_id":0,"ratings":0})
+		link = str(request.form['images'])
+		links = []
+		links.append(link)
 		if(product["manufacturer"] == username):
 			db.products.update_one({"productId": productId}, {"$set": { \
 				"productName" : request.form['productName'], \
 				"price" : float(request.form['price']), \
 				"description" : request.form['description'], \
-				"images" : list(request.form['images']),\
+				"images" : links,\
 				"tags" : request.form['tags'],\
 				"numOfItemsAvailable" : int(request.form['numOfItemsAvailable'])
 				}})
