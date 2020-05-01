@@ -1,0 +1,20 @@
+load csv with headers from "file:///product_name.csv" as row merge (p:Product {id:toInteger(row.Id),name:row.name,rating:toFloat(row.ratings),stocksAvailable:toFloat(row.stocks_available)}) return count(p)
+
+load csv with headers from "file:///user_name.csv" as row merge (u:User {id:toInteger(row.Id),name:row.name}) return count(u)
+
+load csv with headers from "file:///manufacturer.csv" as row merge (m:Manufacturer {id:toInteger(row.Id),name:row.name}) return count(m)
+
+load csv with headers from "file:///manufacturer.csv" as row match (m:Manufacturer {id:toInteger(row.Id),name:row.name}) match (p:Product {name:row.produced}) merge (m)-[r:manufactured]->(p) return count(r)
+
+load csv with headers from "file:///product_person.csv" as row match (u:User {name:row.user}) match (p:Product {name:row.product}) merge (u)-[s:brought]->(p) return count(s)
+
+merge(t:Tag {id:1,name:"Art"})
+merge(t:Tag {id:2, name:"Games"})
+merge(t:Tag {id:3, name:"Toys"})
+merge(t:Tag, {id:4, name:"Fancy"})
+
+
+collobrative filtering:
+match (u:User)-[:brought]->(p:Product)<-[:brought]-(q:User)-[:brought]->(r:Product) where u.name={name} r.rating>4.5 AND r.stocksAvailable>0 AND p.id<>r.id return r
+
+Username = "johnburns"
