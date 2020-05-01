@@ -8,7 +8,8 @@ from collections import Counter
 app = Flask(__name__)
 app.secret_key = 'mysecret'
 
-client = MongoClient('mongodb+srv://cluster0-8cf7c.gcp.mongodb.net/test',username='aravindk',password='aravindk')
+#client = MongoClient('mongodb+srv://cluster0-8cf7c.gcp.mongodb.net/test',username='aravindk',password='aravindk')
+client = MongoClient("mongodb://127.0.0.1:27017")
 db = client.generic_ecommerce_website
 products = db.products
 users = db.users
@@ -39,7 +40,7 @@ def register():
 		existing_admin = admins.find_one({'username' : request.form['username']})
 		if existing_user is None and existing_admin is None:
 			hashpass = bcrypt.hashpw(request.form['password'].encode('utf-8'), bcrypt.gensalt())
-			users.insert_one({'username' : request.form['username'], 'password' : hashpass, 'cart' : [], 'address': "", 'mobile': "", 'purchased':[]})
+			users.insert_one({'username' : request.form['username'], 'password' : hashpass, 'cart' : [], 'address': "", 'mobile': "", 'purchased':[], 'rating':{}})
 			session['username'] = request.form['username']
 			return redirect(url_for('index'))
 		return 'That username already exists!'
@@ -64,7 +65,13 @@ def viewProducts ():
 def viewIndividualProduct (productId):
 	#Display the individual product
 	if 'username' in session:
-		return render_template('individual_product.html', product = products.find_one({"productId" : productId}), user = users.find_one({"username" : session["username"]}))
+		user = users.find_one({"username" : session["username"]})
+		rating  = 0
+		try:
+			rating = user['rating'][str(productId)]
+		except:
+			rating = "Not rated"
+		return render_template('individual_product.html', product = products.find_one({"productId" : productId}), user = user,rating = rating)
 	return redirect(url_for('index'))
 
 @app.route("/cart/<int:productId>")
@@ -181,6 +188,24 @@ def viewOrders ():
 			productsMap[i["productId"]] = [i["productName"] ,i["price"]]
 		return render_template("orders.html",user = user, orders = orders, products = productsMap)
 	return redirect(url_for('index'))
+
+@app.route("/rating/<int:productId>", methods = ["POST", "GET"])
+def rating(productId):
+	if 'username' in session:
+		username = session["username"]
+		user = db.users.find_one({"username": username})
+		if productId in user["purchased"]:
+			try:
+				user['rating'][str(productId)] = request.form['star']
+				db.users.update_one({"username": username}, {"$set": {"rating": int(user['rating'])}})
+				#print(productId,request.form['star'])
+				return redirect(url_for('viewIndividualProduct',productId=productId,rating = int(request.form['star'])))			
+			except:
+				db.users.update_one({"username": username}, {"$set": {"rating": {str(productId): int(request.form['star'])}}})
+				#print(productId,request.form['star'])
+				return redirect(url_for('viewIndividualProduct',productId=productId, rating = int(request.form['star'])))
+		return 'You must buy product to rate it'
+	return url_for('index')
 
 @app.route('/admin')
 def adminIndex():

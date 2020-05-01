@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <!--
 To change this license header, choose License Headers in Project Properties.
 To change this template file, choose Tools | Templates
@@ -10,15 +10,51 @@ and open the template in the editor.
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
     <title>Products</title>
     <style>
         .text {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 4; /* number of lines to show */
-            -webkit-box-orient: vertical;
-            height: 108px !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 4; /* number of lines to show */
+        -webkit-box-orient: vertical;
+        height: 108px !important;
+        }
+
+        div.stars {
+        width: 270px;
+        display: inline-block;
+        }
+
+        input.star { display: none; }
+
+        label.star {
+        float: right;
+        padding: 10px;
+        font-size: 36px;
+        color: #444;
+        transition: all .2s;
+        }
+
+        input.star:checked ~ label.star:before {
+        content: '\f005';
+        color: #FD4;
+        transition: all .25s;
+        }
+
+        input.star-5:checked ~ label.star:before {
+        color: #FE7;
+        text-shadow: 0 0 20px #952;
+        }
+
+        input.star-1:checked ~ label.star:before { color: #F62; }
+
+        label.star:hover { transform: rotate(-15deg) scale(1.3); }
+
+        label.star:before {
+        content: '\f006';
+        font-family: FontAwesome;
         }
     </style>
     <link rel="stylesheet" type="text/css"  href="{{ url_for('static',filename='assets/style.css')}}" >
@@ -71,13 +107,35 @@ and open the template in the editor.
                         <br>
                         <div class="row" style="margin-left: 40%;">
                             <form action="{{url_for('buyNow', productId = product['productId'] )}}">
-                                <input type="submit" value="Buy Now" style="width: 100px;">
+                                <input type="submit" value="Buy Now" style="width: 100px;" style="padding-top: 20px;">
                             </form>
-                            <form action="{{url_for('addToCart', productId = product['productId'] )}}">
+                            <form action="{{url_for('addToCart', productId = product['productId'] )}}" style="padding-top: 20px;">
                                 <input type="submit" value="Add to Cart" style="width: 100px;">
-                            </form>
-                        </row>
+                            </form> 
+                            {% if product['productId'] in user['purchased']%}
+                            <div style="margin-left: -45%; margin-top: 15%;">
+                                <h4>Already given rating is <b>{{ rating }}</b> </h4>
+                            </div>
+                            <div class="form-group" style="float: left; margin-left: 20%; margin-top: -15%;" style="padding-top: 40px;">
+                                <form method="POST" action="{{ url_for('rating',productId = product['productId']) }}">
+                                <input class="star star-5" id="star-5" type="radio" name="star" value="5"/>
+                                <label class="star star-5" for="star-5"></label>
+                                <input class="star star-4" id="star-4" type="radio" name="star" value="4"/>
+                                <label class="star star-4" for="star-4"></label>
+                                <input class="star star-3" id="star-3" type="radio" name="star" value="3"/>
+                                <label class="star star-3" for="star-3"></label>
+                                <input class="star star-2" id="star-2" type="radio" name="star" value="2"/>
+                                <label class="star star-2" for="star-2"></label>
+                                <input class="star star-1" id="star-1" type="radio" name="star" value="1"/>
+                                <label class="star star-1" for="star-1"></label>
+                                <br><br>
+                                <button type="submit" class="btn btn-primary btn-block" style="width: 150px; margin-left: 20%;">Submit Rating</button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
+                    
                 </div>
             </div>
         </div>
