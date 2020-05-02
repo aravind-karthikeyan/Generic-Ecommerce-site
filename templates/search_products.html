@@ -63,37 +63,7 @@ and open the template in the editor.
                     <button type="submit" class="btn btn-primary btn-block" style="width: 50px; margin-left: -30%; margin-top: -37%;"><span class="glyphicon glyphicon-search"></span></button>
                 </form>
             </div>
-            <h2 class="jumbotron jumbotron_style" style="float: left;"><b>Products you may like : <br></b></h2>
-            <div class="row text-center" style="margin-top: 20%;">
-                {% for i in recommended %}
-                  <div class="col-md-3 col-sm-6">
-                      <div class="thumbnail">
-                          <a href="/products/{{ i['productId'] }}">
-                              {% if i['images']|length != 0 %}
-                              <img src="{{ i['images'][0] }}" alt="Nikon" style="height: 250px !important;">
-                              {% endif %}
-                              {% if i['images']|length == 0 %}
-                              <img src="{{ url_for('static',filename='images/default.png')}}" style="height: 250px !important;">
-                              {% endif %}
-                          </a>
-                          <div class="caption">
-                              <a href="/products/{{ i['productId'] }}">
-                                  <h3 class="text">{{ i['productName'] }}</h3>
-                              </a>
-                              <p> Rs. {{ i['price']|round(2) }} </p>
-                              <form action="{{url_for('buyNow', productId =  i['productId']) }}">
-                                  <input type="submit" value="Buy Now" style="width: 100px; margin-top: 10px;">
-                              </form>
-                              <form action="{{ url_for('addToCart', productId = i['productId']) }}">
-                                  <input type="submit" value="Add to Cart" style="width: 100px; margin-top: 10px;">
-                              </form>
-                          </div>
-                      </div>
-                  </div>
-                  {% endfor %}
-              </div>
-              <h2 class="jumbotron jumbotron_style" style="float: left; margin-top: 2%;"><b>All products : <br></b></h2>
-            <div class="row text-center" style="margin-top: 17%;">
+            <div class="row text-center" style="margin-top: 15%;">
               {% for i in products %}
                 <div class="col-md-3 col-sm-6">
                     <div class="thumbnail">

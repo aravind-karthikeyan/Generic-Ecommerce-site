@@ -4,10 +4,15 @@ from pymongo import MongoClient
 import os
 import bcrypt
 from collections import Counter
+from neo4j import GraphDatabase
 
+#flask app setup
 app = Flask(__name__)
 app.secret_key = 'mysecret'
 
+#connection to neo4j and mongodb databases
+uri = "bolt://localhost:7687"
+graphDB_Driver = GraphDatabase.driver(uri, auth=("neo4j", "password"),encrypted=False)
 #client = MongoClient('mongodb+srv://cluster0-8cf7c.gcp.mongodb.net/test',username='aravindk',password='aravindk')
 client = MongoClient("mongodb://127.0.0.1:27017")
 db = client.generic_ecommerce_website
@@ -15,6 +20,46 @@ products = db.products
 users = db.users
 admins = db.admins
 
+#neo4j recommendation functions
+def collaborativeFiltering(username):
+	cql = "match (p1:User)-[x:bought]->(p:Product)<-[y:bought]-(p2:User) with count(p)\
+			AS numberproducts, SUM(x.rating * y.rating) AS xyDotProduct, \
+			SQRT(REDUCE(xDot = 0.0, a IN COLLECT(x.rating) | xDot + a^2)) \
+			AS xLength, SQRT(REDUCE(yDot = 0.0, b IN COLLECT(y.rating) | yDot + b^2)) \
+			AS yLength, p1, p2 where p1.name=$name with p1, p2, xyDotProduct / (xLength * yLength) \
+			AS sim ORDER BY sim DESC LIMIT 10 MATCH (p2)-[r:bought]->(p:Product) \
+			where not exists ((p1)-[:bought]->(p)) return p.name, sum(sim*r.rating) \
+			as score, p.id order by score DESC LIMIT 9"
+	products = []
+	with graphDB_Driver.session() as graphDB_Session:
+		name = username
+		nodes = graphDB_Session.run(cql,name=name)
+		for node in nodes:
+			products.append(node["p.id"])
+	return products
+
+def contentBasedFiltering(username):
+	cql1 = "match (u:User)-[:bought]->(p:Product) where u.name=$name return collect(p.Tag)"
+	cql2 = "match (u:User)-[:bought]->(p:Product)-[:belongs_to]->(t:Tag)<-[:belongs_to]-(r:Product) \
+			where u.name=$name and t.name = $domain and r.rating>4.5 and r.stocksAvailable>0 return r.id \
+			limit 9"
+	domain=str()
+	l1=[]
+	products = []
+	with graphDB_Driver.session() as graphDB_Session:
+		name = username
+		nodes = graphDB_Session.run(cql1,name=name)
+		for node in nodes:
+			l1=node["collect(p.Tag)"]
+			g1 = dict(Counter(l1))
+			g1 = sorted(g1.items(),key=lambda x:x[1],reverse=True)
+			domain=g1[0][0]
+		nodes = graphDB_Session.run(cql2,name=name,domain=domain)
+		for node in nodes:
+			products.append(node["r.id"])
+	return products
+
+#flask functions and routes
 @app.route('/')
 def index():
 	if 'username' in session:
@@ -58,7 +103,14 @@ def logout():
 def viewProducts ():
 	#Display the Products
 	if 'username' in session:
-		return render_template("products.html",products = products.find(), user = users.find_one({"username" : session["username"]}))
+		username = session["username"]
+		recommendedIds = []
+		user = users.find_one({"username" : username})
+		if(len(user['purchased'])>0):
+			recommendedIds+=collaborativeFiltering(username)
+			recommendedIds+=contentBasedFiltering(username)
+		recommended = products.find({"productId": { "$in" : recommendedIds}})
+		return render_template("products.html",products = products.find(),recommended = recommended, user = user)
 	return redirect(url_for('index'))
 
 @app.route("/search_products", methods = ['POST', 'GET'])
@@ -66,7 +118,7 @@ def searchProducts ():
 	#Display the searched Products
 	if 'username' in session:
 		query = request.form['query']
-		return render_template("products.html",products = products.find({"$or": [{"productName":{"$regex":query, \
+		return render_template("search_products.html",products = products.find({"$or": [{"productName":{"$regex":query, \
 															"$options": '-i'}},{"tags":{"$regex":query, "$options": '-i'}}]})\
 															, user = users.find_one({"username" : session["username"]}))
 	return redirect(url_for('index'))
