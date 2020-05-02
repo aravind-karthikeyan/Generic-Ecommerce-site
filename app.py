@@ -8,8 +8,8 @@ from collections import Counter
 app = Flask(__name__)
 app.secret_key = 'mysecret'
 
-#client = MongoClient('mongodb+srv://cluster0-8cf7c.gcp.mongodb.net/test',username='aravindk',password='aravindk')
-client = MongoClient("mongodb://127.0.0.1:27017")
+client = MongoClient('mongodb+srv://cluster0-8cf7c.gcp.mongodb.net/test',username='aravindk',password='aravindk')
+#client = MongoClient("mongodb://127.0.0.1:27017")
 db = client.generic_ecommerce_website
 products = db.products
 users = db.users
