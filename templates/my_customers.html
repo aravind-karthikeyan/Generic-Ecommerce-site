@@ -10,7 +10,7 @@ and open the template in the editor.
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <title>My Products</title>
+    <title>My Customers</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="style.css" rel="stylesheet">
@@ -48,26 +48,18 @@ and open the template in the editor.
                         <table class="table table-bordered table-striped table-hover">
                             <tbody>
                                 <tr>
-                                    <th style = "text-align : center">Item Number</th>
-                                    <th style = "text-align : center">Item Name</th>
+                                    <th style = "text-align : center">Customer Name</th>
                                     <th style = "text-align : center">Item Quantity</th>
-                                    <th style = "text-align : center">Price</th>
-                                    <th></th>
                                 </tr>
                                 <tr></tr>
-                                {% for i in products %}
+                                {% for i in orders %}
                                 <tr>
-                                    <th style = "text-align : center"><a href="{{ url_for('myCustomers',productId = i['productId']) }}">{{ i["productId"] }}</a></th>
-                                    <th style = "text-align : center"><a href="{{ url_for('myCustomers',productId = i['productId']) }}">{{ i["productName"] }}</a></th>
-                                    <th style = "text-align : center; vertical-align: middle;">{{ i["numOfItemsAvailable"] }}</th>
-                                    <th style = "text-align : right">Rs.{{ i["price"]|round(2,"ceil") }}</th>
-                                    <th>
-                                        <form action="{{url_for('editProduct',productId=i['productId']) }}" method="GET">
-                                            <input type="submit" value="Edit" style="width: 100px;">
-                                        </form>
-                                    </th>
+                                    <th style = "text-align : center">{{ i }}</th>
+                                    <th style = "text-align : center">{{ orders[i] }}</th>
                                 </tr>
                                 {% endfor %}
+                                <tr>
+                                </tr>
                             </tbody>
                         </table>
                     </div>

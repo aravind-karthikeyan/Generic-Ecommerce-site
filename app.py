@@ -66,7 +66,9 @@ def searchProducts ():
 	#Display the searched Products
 	if 'username' in session:
 		query = request.form['query']
-		return render_template("products.html",products = products.find({"productName":{"$regex":query, "$options": '-i'}}), user = users.find_one({"username" : session["username"]}))
+		return render_template("products.html",products = products.find({"$or": [{"productName":{"$regex":query, \
+															"$options": '-i'}},{"tags":{"$regex":query, "$options": '-i'}}]})\
+															, user = users.find_one({"username" : session["username"]}))
 	return redirect(url_for('index'))
 
 @app.route("/products/<int:productId>")
@@ -294,6 +296,9 @@ def addProductSuccess():
 		link = str(request.form['images'])
 		links = []
 		links.append(link)
+		user = db.admins.find_one({"username": username})
+		user['products'].append(productId)
+		db.admins.update_one({"username": username}, {"$set": {"products": user["products"]}})
 		db.products.insert_one( { \
 		"productId" : productId, \
 		"manufacturer" : username, \
@@ -319,6 +324,14 @@ def addProduct():
 @app.route('/product_edit_success')
 def editSuccess():
 	return render_template('product_edit_success.html')
+
+@app.route('/my_customers/<int:productId>')
+def myCustomers(productId):
+	order = users.find({"purchased": {"$in": [productId]}})
+	orders = dict()
+	for i in order:
+		orders[i["username"]] = i["purchased"].count(productId)
+	return render_template('my_customers.html',orders = orders)
 if __name__ == "__main__":
 	app.debug = True
 	app.run()
