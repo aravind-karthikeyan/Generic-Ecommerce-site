@@ -208,11 +208,9 @@ def rating(productId):
 			try:
 				user['rating'][str(productId)] = request.form['star']
 				db.users.update_one({"username": username}, {"$set": {"rating": int(user['rating'])}})
-				#print(productId,request.form['star'])
 				return redirect(url_for('viewIndividualProduct',productId=productId,rating = int(request.form['star'])))			
 			except:
 				db.users.update_one({"username": username}, {"$set": {"rating": {str(productId): int(request.form['star'])}}})
-				#print(productId,request.form['star'])
 				return redirect(url_for('viewIndividualProduct',productId=productId))
 		return 'You must buy product to rate it'
 	return url_for('index')
@@ -259,7 +257,8 @@ def editProduct(productId):
 		return "You have no permission to edit that product!"
 	if 'username' in session:
 		return "You are not permitted to access that page"
-	return redirect(url_for('adminIndex')) 
+	return redirect(url_for('adminIndex'))
+ 
 @app.route('/submit_edit/<int:productId>', methods=['GET','POST'])
 def submitEdit(productId):
 	if 'manufacturerName' in session:
@@ -332,6 +331,7 @@ def myCustomers(productId):
 	for i in order:
 		orders[i["username"]] = i["purchased"].count(productId)
 	return render_template('my_customers.html',orders = orders)
+
 if __name__ == "__main__":
 	app.debug = True
 	app.run()
