@@ -57,8 +57,8 @@ and open the template in the editor.
                                 <tr></tr>
                                 {% for i in orders %}
                                 <tr>
-                                    <th style = "text-align : center">{{ i }}</th>
-                                    <th style = "text-align : center">{{ products[i][0] }}</th>
+                                    <th style = "text-align : center"><a href="{{ url_for('viewIndividualProduct',productId=i) }}">{{ i }}</a></th>
+                                    <th style = "text-align : center"><a href="{{ url_for('viewIndividualProduct',productId=i) }}">{{ products[i][0] }}</a></th>
                                     <th style = "text-align : center; vertical-align: middle;">
                                         {{ orders[i] }}
                                     </th>

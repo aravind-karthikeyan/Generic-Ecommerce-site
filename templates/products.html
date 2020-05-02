@@ -56,7 +56,14 @@ and open the template in the editor.
                 </p>
             </div>
             <div class="padding-20"></div>
-            <div class="row text-center">
+            <div class="form-group" style="float: right; margin-left: 20%;" style="padding-top: 40px;">
+                <form method="POST" action="{{ url_for('searchProducts') }}">
+                    <input type="text" class="form-control" name="query" placeholder="Enter search text here">
+                    <br><br>
+                    <button type="submit" class="btn btn-primary btn-block" style="width: 50px; margin-left: -30%; margin-top: -37%;"><span class="glyphicon glyphicon-search"></span></button>
+                </form>
+            </div>
+            <div class="row text-center" style="margin-top: 15%;">
               {% for i in products %}
                 <div class="col-md-3 col-sm-6">
                     <div class="thumbnail">

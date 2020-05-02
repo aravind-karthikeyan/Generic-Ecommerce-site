@@ -61,6 +61,14 @@ def viewProducts ():
 		return render_template("products.html",products = products.find(), user = users.find_one({"username" : session["username"]}))
 	return redirect(url_for('index'))
 
+@app.route("/search_products", methods = ['POST', 'GET'])
+def searchProducts ():
+	#Display the searched Products
+	if 'username' in session:
+		query = request.form['query']
+		return render_template("products.html",products = products.find({"productName":{"$regex":query, "$options": '-i'}}), user = users.find_one({"username" : session["username"]}))
+	return redirect(url_for('index'))
+
 @app.route("/products/<int:productId>")
 def viewIndividualProduct (productId):
 	#Display the individual product
