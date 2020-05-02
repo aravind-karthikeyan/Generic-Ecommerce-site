@@ -208,9 +208,11 @@ def rating(productId):
 			try:
 				user['rating'][str(productId)] = request.form['star']
 				db.users.update_one({"username": username}, {"$set": {"rating": int(user['rating'])}})
+				db.products.update_one({"productId": productId}, { "$set" : {"ratings."+username : request.form['star'] }})
 				return redirect(url_for('viewIndividualProduct',productId=productId,rating = int(request.form['star'])))			
 			except:
 				db.users.update_one({"username": username}, {"$set": {"rating": {str(productId): int(request.form['star'])}}})
+				db.products.update_one({"productId": productId}, { "$set" : {"ratings."+username : request.form['star'] }})
 				return redirect(url_for('viewIndividualProduct',productId=productId))
 		return 'You must buy product to rate it'
 	return url_for('index')
