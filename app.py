@@ -30,13 +30,13 @@ def collaborativeFiltering(username):
 			AS sim ORDER BY sim DESC LIMIT 10 MATCH (p2)-[r:bought]->(p:Product) \
 			where not exists ((p1)-[:bought]->(p)) return p.name, sum(sim*r.rating) \
 			as score, p.id order by score DESC LIMIT 9"
-	products = []
+	recProducts = []
 	with graphDB_Driver.session() as graphDB_Session:
 		name = username
 		nodes = graphDB_Session.run(cql,name=name)
 		for node in nodes:
-			products.append(node["p.id"])
-	return products
+			recProducts.append(node["p.id"])
+	return recProducts
 
 def contentBasedFiltering(username):
 	cql1 = "match (u:User)-[:bought]->(p:Product) where u.name=$name return collect(p.Tag)"
@@ -45,7 +45,7 @@ def contentBasedFiltering(username):
 			limit 9"
 	domain=str()
 	l1=[]
-	products = []
+	recProducts = []
 	with graphDB_Driver.session() as graphDB_Session:
 		name = username
 		nodes = graphDB_Session.run(cql1,name=name)
@@ -56,8 +56,19 @@ def contentBasedFiltering(username):
 			domain=g1[0][0]
 		nodes = graphDB_Session.run(cql2,name=name,domain=domain)
 		for node in nodes:
-			products.append(node["r.id"])
-	return products
+			recProducts.append(node["r.id"])
+	return recProducts
+
+#recommendation for new user
+def mostRated():
+	query = "match (p:Product) return p.id order by p.rating desc limit 9"
+	recProducts = []
+	with graphDB_Driver.session() as graphDB_Session:
+		nodes = graphDB_Session.run(query)
+		for node in nodes:
+			recProducts.append(node["p.id"])
+	print(recProducts)
+	return recProducts
 
 #flask functions and routes
 @app.route('/')
@@ -87,6 +98,10 @@ def register():
 			hashpass = bcrypt.hashpw(request.form['password'].encode('utf-8'), bcrypt.gensalt())
 			users.insert_one({'username' : request.form['username'], 'password' : hashpass, 'cart' : [], 'address': "", 'mobile': "", 'purchased':[], 'rating':{}})
 			session['username'] = request.form['username']
+			query = "create(u:User) set u={name:$name} return u.name"
+			with graphDB_Driver.session() as graphDB_Session:
+				name = request.form['username']
+				graphDB_Session.run(query,name=name)
 			return redirect(url_for('index'))
 		return 'That username already exists!'
 	return render_template('register.html')
@@ -106,9 +121,12 @@ def viewProducts ():
 		username = session["username"]
 		recommendedIds = []
 		user = users.find_one({"username" : username})
+		recommended = []
 		if(len(user['purchased'])>0):
 			recommendedIds+=collaborativeFiltering(username)
 			recommendedIds+=contentBasedFiltering(username)
+		else:
+			recommendedIds = mostRated()
 		recommended = products.find({"productId": { "$in" : recommendedIds}})
 		return render_template("products.html",products = products.find(),recommended = recommended, user = user)
 	return redirect(url_for('index'))
@@ -223,6 +241,17 @@ def placeOrder ():
 			product = products.find({"productId" : { "$in" : list(cart.keys())} })
 			for i in product:
 				purchased = db.users.find_one({"username": username})["purchased"]
+				query1 = "match (u:User) where u.name=$uname match (p:Product) where p.id=$pid merge \
+						(u)-[r:bought]->(p) return count(r) as count"
+				query2 = "match (p:Product) where p.id=$pid set p.stocksAvailable=$stocks_available return p.id"
+				if(i['productId'] not in purchased):
+					with graphDB_Driver.session() as graphDB_Session:
+						uname = username
+						pid = i['productId']
+						graphDB_Session.run(query1, uname = uname, pid = pid)
+				with graphDB_Driver.session() as graphDB_Session:
+					pid = i['productId']
+					graphDB_Session.run(query2, pid = pid, stocks_available = i['numOfItemsAvailable']-cart[i['productId']])
 				db.users.update_one({"username": username}, {"$set": {"purchased": purchased+[i['productId']]*cart[i['productId']]}})
 				db.products.update_one({"productId": i['productId']}, {"$set": {"numOfItemsAvailable": i['numOfItemsAvailable']-cart[i['productId']]}})
 			return redirect(url_for('clearCart'))	
@@ -257,6 +286,14 @@ def rating(productId):
 		username = session["username"]
 		user = db.users.find_one({"username": username})
 		if productId in user["purchased"]:
+			query1 = "match (u:User)-[r:bought]->(p:Product) set r.rating=$rating"
+			query2 = "match (p:Product)<-[:bought]-(u:User) where p.id=$pid with \
+					count(u)-1 as existing_users, p as p set p.rating=(existing_users*p.rating+$rating)\
+					/existing_users+1 return p.id"
+			with graphDB_Driver.session() as graphDB_Session:
+				rating = request.form['star']
+				graphDB_Session.run(query1,rating=rating)
+				graphDB_Session.run(query2,pid=productId,rating=rating)
 			try:
 				user['rating'][str(productId)] = request.form['star']
 				db.users.update_one({"username": username}, {"$set": {"rating": int(user['rating'])}})
@@ -296,6 +333,10 @@ def adminSignup():
 		if existing_admin is None and existing_user is None:
 			hashpass = bcrypt.hashpw(request.form['password'].encode('utf-8'), bcrypt.gensalt())
 			admins.insert_one({'username' : request.form['username'], 'password' : hashpass, 'products' : [], 'address': "", 'mobile': ""})
+			query = "create(m:Manufacturer) set m={name:$name} return m.id"
+			with graphDB_Driver.session() as graphDB_Session:
+				name = request.form['username']
+				graphDB_Session.run(query,name=name)
 			session['manufacturerName'] = request.form['username']
 			return redirect(url_for('adminIndex'))
 		return 'That Manufacturer name already exists!'
@@ -330,6 +371,13 @@ def submitEdit(productId):
 				"tags" : request.form['tags'],\
 				"numOfItemsAvailable" : int(request.form['numOfItemsAvailable'])
 				}})
+			query = "match (p:Product) where p.id=$pid set p={name:$name,stocksAvailable:$stocks_available,Tag:$tag} return p.id"
+			with graphDB_Driver.session() as graphDB_Session:
+				pid = productId
+				name = request.form['productName']
+				stocks_available = int(request.form['numOfItemsAvailable'])
+				tag = request.form['tags']
+				graphDB_Session.run(query, pid = pid, name=name, stocks_available = stocks_available, tag = tag)
 			return redirect(url_for('editSuccess'))
 		else:
 			return "You have no permission to edit that product!"
@@ -362,6 +410,16 @@ def addProductSuccess():
 		"tags" : request.form['tags'],\
 		"numOfItemsAvailable" : int(request.form['numOfItemsAvailable'])
 		})
+		query1 = "create(p:Product) set p={id:$pid,name:$name,stocksAvailable:$stocks_available,Tag:$tag} return p.id"
+		query2 = "match (p:Product) where p.id=$pid match (m:Manufacturer) where m.name=$mname \
+				merge (m)-[r:manufactured]->(p) return count(r) as count"
+		with graphDB_Driver.session() as graphDB_Session:
+			pid = productId
+			name = request.form['productName']
+			stocks_available = int(request.form['numOfItemsAvailable'])
+			tag = request.form['tags']
+			graphDB_Session.run(query1, pid = pid, name=name, stocks_available = stocks_available, tag = tag)
+			graphDB_Session.run(query2, pid = pid, mname=username) 
 		return redirect(url_for('editSuccess'))
 	else:
 		return redirect(url_for('adminIndex'))
