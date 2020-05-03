@@ -145,12 +145,15 @@ def searchProducts ():
 def viewIndividualProduct (productId):
 	#Display the individual product
 	if 'username' in session:
+		rating = 0
 		user = users.find_one({"username" : session["username"]})
-		rating  = 0
-		try:
-			rating = user['rating'][str(productId)]
-		except:
-			rating = "Not rated"
+		query1 = "match (u:User)-[r:bought]->(p:Product) where u.name=$uname and p.id=$pid return r.rating"
+		with graphDB_Driver.session() as graphDB_Session:
+			nodes = graphDB_Session.run(query1, uname=session["username"],pid=int(productId))
+			for node in nodes:
+				rating=node["r.rating"]
+		if(rating==0):
+			rating="Not rated"
 		return render_template('individual_product.html', product = products.find_one({"productId" : productId}), user = user,rating = rating)
 	return redirect(url_for('index'))
 
@@ -242,7 +245,7 @@ def placeOrder ():
 			for i in product:
 				purchased = db.users.find_one({"username": username})["purchased"]
 				query1 = "match (u:User) where u.name=$uname match (p:Product) where p.id=$pid merge \
-						(u)-[r:bought]->(p) return count(r) as count"
+						(u)-[r:bought {rating:0}]->(p) return count(r) as count"
 				query2 = "match (p:Product) where p.id=$pid set p.stocksAvailable=$stocks_available return p.id"
 				if(i['productId'] not in purchased):
 					with graphDB_Driver.session() as graphDB_Session:
@@ -286,14 +289,18 @@ def rating(productId):
 		username = session["username"]
 		user = db.users.find_one({"username": username})
 		if productId in user["purchased"]:
-			query1 = "match (u:User)-[r:bought]->(p:Product) set r.rating=$rating"
+			query1 = "match (u:User)-[r:bought]->(p:Product) where u.name=$uname and p.id=$pid return r.rating"
 			query2 = "match (p:Product)<-[:bought]-(u:User) where p.id=$pid with \
-					count(u)-1 as existing_users, p as p set p.rating=(existing_users*p.rating+$rating)\
-					/existing_users+1 return p.id"
+					count(u)-1 as existing_users, p as p set p.rating=(((existing_users*p.rating)-$oldrating)+$newrating)\
+					/(existing_users+1) return p.id"
+			query3 = "match (u:User)-[r:bought]->(p:Product) where u.name=$uname and p.id=$pid set r.rating=$newrating"
 			with graphDB_Driver.session() as graphDB_Session:
-				rating = request.form['star']
-				graphDB_Session.run(query1,rating=rating)
-				graphDB_Session.run(query2,pid=productId,rating=rating)
+				newrating = int(request.form['star'])
+				nodes=graphDB_Session.run(query1,uname=username,pid=productId)
+				for node in nodes:
+					oldrating = int(node["r.rating"])
+				graphDB_Session.run(query2,pid=productId,oldrating=oldrating,newrating=newrating)
+				graphDB_Session.run(query3,uname=username,pid=productId,newrating=newrating)
 			try:
 				user['rating'][str(productId)] = request.form['star']
 				db.users.update_one({"username": username}, {"$set": {"rating": int(user['rating'])}})
@@ -371,12 +378,13 @@ def submitEdit(productId):
 				"tags" : request.form['tags'],\
 				"numOfItemsAvailable" : int(request.form['numOfItemsAvailable'])
 				}})
-			query = "match (p:Product) where p.id=$pid set p={name:$name,stocksAvailable:$stocks_available,Tag:$tag} return p.id"
+			query = "match (p:Product) where p.id=$pid set p={id:$pid,name:$name,stocksAvailable:$stocks_available,Tag:$tag} return p.id"
 			with graphDB_Driver.session() as graphDB_Session:
 				pid = productId
 				name = request.form['productName']
 				stocks_available = int(request.form['numOfItemsAvailable'])
 				tag = request.form['tags']
+				print(pid,name,stocks_available,tag)
 				graphDB_Session.run(query, pid = pid, name=name, stocks_available = stocks_available, tag = tag)
 			return redirect(url_for('editSuccess'))
 		else:
@@ -410,7 +418,7 @@ def addProductSuccess():
 		"tags" : request.form['tags'],\
 		"numOfItemsAvailable" : int(request.form['numOfItemsAvailable'])
 		})
-		query1 = "create(p:Product) set p={id:$pid,name:$name,stocksAvailable:$stocks_available,Tag:$tag} return p.id"
+		query1 = "create(p:Product) set p={id:$pid,name:$name,stocksAvailable:$stocks_available,Tag:$tag,rating:5} return p.id"
 		query2 = "match (p:Product) where p.id=$pid match (m:Manufacturer) where m.name=$mname \
 				merge (m)-[r:manufactured]->(p) return count(r) as count"
 		with graphDB_Driver.session() as graphDB_Session:
