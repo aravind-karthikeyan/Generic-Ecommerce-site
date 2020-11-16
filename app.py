@@ -351,9 +351,9 @@ def google_login():
 	resp = google.get("/oauth2/v1/userinfo")
 	assert resp.ok, resp.text
 	print(resp.json()["email"])
-	login_user = findUser(resp.json()["email"])
-	if not login_user:
-		insertUser(resp.json()["email"], "")
+	user = users.find_one({'username' : resp.json()["email"]})
+	if not user:
+		users.insert_one({'username' : resp.json()["email"], 'password' : "", 'cart' : [], 'address': "", 'mobile': "", 'purchased':[], 'rating':{}})
 	session['username'] = resp.json()["email"]
 	return redirect(url_for('index'))
 
