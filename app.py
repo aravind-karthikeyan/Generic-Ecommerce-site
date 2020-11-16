@@ -334,6 +334,30 @@ def myCustomers(productId):
 		orders[i["username"]] = i["purchased"].count(productId)
 	return render_template('my_customers.html',orders = orders)
 
+from flask_dance.contrib.google import make_google_blueprint, google
+
+app.config["GOOGLE_OAUTH_CLIENT_ID"] = "556847905057-doibroqcnu94pecjcb0qf4esl0qslfio.apps.googleusercontent.com"
+app.config["GOOGLE_OAUTH_CLIENT_SECRET"] = "4j5PNyUOxikXB-lf-5xddkaK"
+google_bp = make_google_blueprint(scope=["profile", "email"])
+app.register_blueprint(google_bp, url_prefix="/login")
+ 
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
+
+@app.route("/google")
+def google_login():
+	if not google.authorized:
+		return redirect(url_for("google.login"))
+	resp = google.get("/oauth2/v1/userinfo")
+	assert resp.ok, resp.text
+	print(resp.json()["email"])
+	login_user = findUser(resp.json()["email"])
+	if not login_user:
+		insertUser(resp.json()["email"], "")
+	session['username'] = resp.json()["email"]
+	return redirect(url_for('index'))
+
+
 if __name__ == "__main__":
 	app.debug = True
 	app.run()
