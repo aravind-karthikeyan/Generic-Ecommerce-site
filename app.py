@@ -355,8 +355,7 @@ def google_login():
 	if not user:
 		users.insert_one({'username' : resp.json()["email"], 'password' : "", 'cart' : [], 'address': "", 'mobile': "", 'purchased':[], 'rating':{}})
 	session['username'] = resp.json()["email"]
-	return redirect(url_for('index'))
-
+	return render_template("products.html",products = products.find(), user = users.find_one({"username" : session["username"]}))
 
 if __name__ == "__main__":
 	app.debug = True
