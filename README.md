@@ -25,4 +25,4 @@ Our local web server is running in the port 5000 by default.
 
 ##### Live Deployment
 
-https://generic-ecommerce-site.herokuapp.com/
+https://generic-ecommerce-site-aravind.herokuapp.com/
