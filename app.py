@@ -70,13 +70,14 @@ def register():
 @app.route('/logout')
 def logout():
 	if 'username' in session:
-		token = google_bp.token["access_token"]
-		resp = google.post(
-			"https://accounts.google.com/o/oauth2/revoke",
-			params={"token": token},
-			headers={"Content-Type": "application/x-www-form-urlencoded"}
-		)
-		del google_bp.token
+		if google.authorized:
+			token = google_bp.token["access_token"]
+			resp = google.post(
+				"https://accounts.google.com/o/oauth2/revoke",
+				params={"token": token},
+				headers={"Content-Type": "application/x-www-form-urlencoded"}
+			)
+			del google_bp.token
 		session.pop('username')
 	if 'manufacturerName' in session:
 		session.pop('manufacturerName')
